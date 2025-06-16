@@ -21,18 +21,18 @@ classdef RBE3 < mni.printing.cards.BaseCard
             %   Detailed explanation goes here
             p = inputParser();
             p.addRequired('EID',@(x)x>0)
-            p.addRequired('REFGRID',@(x)x>0)
-            p.addRequired('REFC',@(x)x>0)
+            p.addRequired('REFGRID')
+            p.addRequired('REFC')
             p.addRequired('WTi')
-            p.addRequired('Ci',@(x)x>0)
-            p.addRequired('Gij',@(x)x>0)
-            p.addParameter('UM')
-            p.addParameter('GMi',@(x)~any(x<=0))
-            p.addParameter('CMi',@(x)~any(x<=0))
-            p.addParameter('Alpha','')
+            p.addRequired('Ci')
+            p.addRequired('Gij')
+            p.addParameter('UM','')
+            p.addParameter('GMi',[],@(x)~any(x<=0))
+            p.addParameter('CMi',[],@(x)~any(x<=0))
+            p.addParameter('Alpha',[])
             p.parse(EID,REFGRID,REFC,WTi,Ci,Gij,varargin{:})
             
-            obj.Name = 'MPC';
+            obj.Name = 'RBE3';
             obj.EID     = p.Results.EID;
             obj.REFGRID = p.Results.REFGRID;
             obj.REFC    = p.Results.REFC;
@@ -55,16 +55,30 @@ classdef RBE3 < mni.printing.cards.BaseCard
             %writeToFile print DMI entry to file
             writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
             data = {obj.EID};
-            format = 'i';
-            j=1;
-            data = [data,{obj.REFGRID},{obj.REFC},{obj.WTi(1)}];
-
-            for i = 2:length(obj.WTi)
-                data = [data,{obj.Gi(i)},{obj.Ci(j)},{obj.WTi(i)},];
-                format = [format,'iir'];
+            format = 'ib';
+            data = [data,{obj.REFGRID.ID},{obj.REFC},{obj.WTi},{obj.Ci}];
+             format = [format,'iiri'];
+            for i = 1:(length(obj.Gij))
+                data = [data,{obj.Gij(i).ID}];
+                format = [format,'i'];
             end
-
-           
+            % for j=1:length(obj.Ci)
+            % %j=1;
+            % data = [data,{obj.REFGRID.ID},{obj.REFC(j)},{obj.WTi(1)}];
+            % 
+            % for i = 1:(length(obj.WTi)-1)
+            %     data = [data,{obj.Gij(i).ID},{obj.Ci(j)},{obj.WTi(i+1)},];
+            %     if i==1
+            %     format = [format,'iir'];
+            %     elseif mod(i,2)==1 && i>1 
+            %     format = [format,'biir'];
+            %     else
+            %     format = [format,'iirb'];
+            %     end
+            % end
+            % 
+            % end
+            
             % for i = 1:length(obj.Gij)
             %     data = [data,{obj.Gij(i)}];
             %     format = [format,'i'];

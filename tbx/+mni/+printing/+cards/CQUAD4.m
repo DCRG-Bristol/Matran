@@ -39,7 +39,7 @@ classdef CQUAD4 < mni.printing.cards.BaseCard
             data = [{obj.EID},{obj.PID}];
             format = 'ii';
             for i = 1:length(obj.G1)
-                data = [data,{obj.G1(i)}];
+                data = [data,{obj.G1(i).ID}];
                 format = [format,'i'];
             end
             
