@@ -21,7 +21,7 @@ classdef AeroelasticSpline < mni.bulk.BulkData
                 'Connections', { ...
                 'CAERO', 'mni.bulk.AeroPanel'  , 'AeroPanel', ...
                 'SETG' , 'mni.bulk.List'       , 'StrucNode', ...
-                'CID'  , 'mni.bulk.CoordSystem', 'CoordSystem'})
+                'CID'  , 'mni.bulk.CoordSystem', 'CoordSystem'});
             varargin = parse(obj, varargin{:});
             preallocate(obj);
             
@@ -29,7 +29,7 @@ classdef AeroelasticSpline < mni.bulk.BulkData
     end
     
     methods % visualisation
-        function hg = drawElement(obj, FEModel, hAx)
+        function hg = drawElement(obj, FEModel, hAx, plotOpts)
             
             hg = [];
             
@@ -70,6 +70,8 @@ classdef AeroelasticSpline < mni.bulk.BulkData
             idx      = ismember(PanelData.IDs, panelIDs);
             
             %Arrange vertex coordinates for vectorised plotting
+            PanelData.Coords = pagemtimes(reshape(plotOpts.A, 1, 1, 3, 3), PanelData.Coords);
+            PanelData.Centre = (plotOpts.A*PanelData.Centre')';
             x = PanelData.Coords(idx, 1 : 4, 1)';
             y = PanelData.Coords(idx, 1 : 4, 2)';
             z = PanelData.Coords(idx, 1 : 4, 3)';

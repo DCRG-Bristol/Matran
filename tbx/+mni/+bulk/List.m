@@ -94,7 +94,6 @@ classdef List < mni.bulk.BulkData
                 'ListProp'   , {'Fi', 'Gi'}, ...
                 'H5ListName' , {'F' , 'G' }, ...
                 'SetMethod'  , {'XAXIS', @validateAxisType, 'YAXIS', @validateAxisType});
-            
             varargin = parse(obj, varargin{:});
             preallocate(obj);            
             

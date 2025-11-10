@@ -13,7 +13,6 @@ classdef AnalysisData < mni.bulk.BulkData
     
     methods % construction
         function obj = AnalysisData(varargin)
-            
             %Initialise the bulk data sets
             addBulkDataSet(obj, 'AERO', ...
                 'BulkProps'  , {'ACSID', 'VELOCITY', 'REFC', 'RHOREF', 'SYMXZ', 'SYMXY'}, ...

@@ -20,8 +20,7 @@ classdef CoordSystem < mni.bulk.BulkData
                 'Connections', {'RID', 'mni.bulk.CoordSystem', 'InputCoordSys'}, ...
                 'PropMask'   , {'A', 3, 'B', 3, 'C', 3}, ...
                 'AttrList'   , {'A', {'nrows', 3}, 'B', {'nrows', 3}, 'C', {'nrows', 3}});
-            
-            varargin = parse(obj, varargin{:});
+            varargin = parse(obj, varargin{:});            
             preallocate(obj);
             
         end
@@ -155,17 +154,17 @@ classdef CoordSystem < mni.bulk.BulkData
     end
     
     methods % visualiation
-        function hg = drawElement(obj, ~,hAx, varargin)
+        function hg = drawElement(obj, ~,hAx, plotOpts)
             
             hg = [];
             
             cids = unique(obj.CID);
             [o,oX,oY,oZ] = deal(zeros(3,length(cids)));
             for i = 1:length(cids)
-                o(:,i) = obj.getPosition([0;0;0],cids(i));
-                eX = obj.getVector([1;0;0],cids(i));
-                eY = obj.getVector([0;1;0],cids(i));
-                eZ = obj.getVector([0;0;1],cids(i));
+                o(:,i) = plotOpts.A*obj.getPosition([0;0;0],cids(i));
+                eX = plotOpts.A*obj.getVector([1;0;0],cids(i));
+                eY = plotOpts.A*obj.getVector([0;1;0],cids(i));
+                eZ = plotOpts.A*obj.getVector([0;0;1],cids(i));
                 
                 oX(:,i) = o(:,i) + eX;
                 oY(:,i) = o(:,i) + eY;

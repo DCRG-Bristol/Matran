@@ -14,10 +14,8 @@ classdef Property < mni.bulk.BulkData
                 'PropTypes'  , {'i'  , 'i'   , 'r', 'i'   , 'r'     , 'i'   , 'r'   , 'r'  , 'r' , 'r' , 'i'   }, ...
                 'PropDefault', {''   , ''    , 0  , 0     , 1       , 0     , .8333 , 0    , 0   , 0   , 0     }, ...
                 'IDProp'     , 'PID');
-            
             varargin = parse(obj, varargin{:});
             preallocate(obj);
-            
         end
     end
     

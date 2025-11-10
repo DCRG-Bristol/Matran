@@ -105,7 +105,7 @@ classdef Beam < mni.bulk.BulkData
     end
     
     methods % visualisation
-        function hg = drawElement(obj, FEModel, hAx, varargin)
+        function hg = drawElement(obj, FEModel, hAx, plotOpts)
             %drawElement Draws the beam objects as a line object between
             %the nodes and returns a single handle for all the beams in the
             %collection.
@@ -116,7 +116,7 @@ classdef Beam < mni.bulk.BulkData
                 return
             end
             
-            coords = getDrawCoords(obj.Nodes,varargin{:});            
+            coords = plotOpts.A*getDrawCoords(obj.Nodes,plotOpts);            
             xA     = coords(:, obj.NodesIndex(1, :));
             xB     = coords(:, obj.NodesIndex(2, :));  
             
@@ -126,9 +126,9 @@ classdef Beam < mni.bulk.BulkData
             
         end
         
-        function updateElement(obj,varargin)
+        function updateElement(obj,plotOpts)
             if ~isempty(obj.plotobj_beams)
-                coords = getDrawCoords(obj.Nodes,varargin{:});            
+                coords = plotOpts.A*getDrawCoords(obj.Nodes,plotOpts);            
                 xA     = coords(:, obj.NodesIndex(1, :));
                 xB     = coords(:, obj.NodesIndex(2, :));
 

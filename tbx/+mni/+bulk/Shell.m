@@ -41,7 +41,6 @@ classdef Shell < mni.bulk.BulkData
                 'PropMask'   , {'G', 3, 'T', 3}, ...
                 'Connections', {'G', 'mni.bulk.Node', 'Nodes', 'PID', 'mni.bulk.Property', 'Prop'}     , ...
                 'AttrList'   , {'G', {'nrows', 3}, 'T', {'nrows', 3}});
-            
             varargin = parse(obj, varargin{:});
             preallocate(obj);
             
@@ -49,7 +48,7 @@ classdef Shell < mni.bulk.BulkData
     end
     
     methods % visualisation
-        function hg = drawElement(obj, ~, hAx, varargin)
+        function hg = drawElement(obj, ~, hAx, plotOpts)
             %drawElement Draws the Shell objects as a patch object between
             %the nodes and returns a single handle for all the patches in
             %the collection.
@@ -62,7 +61,7 @@ classdef Shell < mni.bulk.BulkData
             
             index  = obj.NodesIndex;
             coords = arrayfun(@(ii) obj.Nodes.X(:, index(ii, :)), 1 : size(index, 1), 'Unif', false);
-            coords = permute(cat(3, coords{:}), [3, 2, 1]);
+            coords = plotOpts.A*permute(cat(3, coords{:}), [3, 2, 1]);
             
             hg = patch(hAx, ...
                 'XData'    , coords(:, :, 1), ...
