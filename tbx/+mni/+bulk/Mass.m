@@ -63,6 +63,10 @@ classdef Mass < mni.bulk.BulkData
     
     methods % visualisation
         function coords = get_drawCoords(obj,plotOpts)
+            arguments
+                obj
+                plotOpts = mni.bulk.PlotOpts();
+            end
             coords = getDrawCoords(obj.Nodes,plotOpts);
             if isempty(coords)
                 return
