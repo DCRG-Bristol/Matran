@@ -92,7 +92,8 @@ classdef AeroPanel < mni.bulk.BulkData
                 obj.PanelForce = zeros(size(PanelData.IDs,1),6);
             end
             %Arrange vertex coordinates for vectorised plotting
-            PanelData.Coords = pagemtimes(reshape(plotOpts.A, 1, 1, 3, 3), PanelData.Coords);
+            Crot = pagemtimes(plotOpts.A, permute(PanelData.Coords, [3, 2, 1]));
+            PanelData.Coords = permute(Crot, [3, 2, 1]);
             x = PanelData.Coords(:, 1 : 4, 1)';
             y = PanelData.Coords(:, 1 : 4, 2)';
             z = PanelData.Coords(:, 1 : 4, 3)';
@@ -120,7 +121,8 @@ classdef AeroPanel < mni.bulk.BulkData
         function updateElement(obj,plotOpts)           
             %Grab the panel data
             PanelData = getPanelData(obj,obj.XDir);
-            PanelData.Coords = pagemtimes(reshape(plotOpts.A, 1, 1, 3, 3),PanelData.Coords);
+            Crot = pagemtimes(plotOpts.A, permute(PanelData.Coords, [3, 2, 1]));
+            PanelData.Coords = permute(Crot, [3, 2, 1]);
             PanelData.Centre = (plotOpts.A*PanelData.Centre')';
             %Arrange vertex coordinates for vectorised plotting
             x = PanelData.Coords(:, 1 : 4, 1)';
