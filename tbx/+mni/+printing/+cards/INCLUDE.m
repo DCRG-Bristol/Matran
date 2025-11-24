@@ -18,18 +18,19 @@ classdef INCLUDE < mni.printing.cards.BaseCard
             %writeToFile print DMI entry to file
             writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
             %convert to literal string
-            filepath = strrep(convertStringsToChars(obj.File),'\','\\');
-            fileSections = strsplit(filepath,'\\');
+            dubSep = [filesep, filesep];
+            filepath = strrep(convertStringsToChars(obj.File), filesep, dubSep);
+            fileSections = strsplit(filepath, dubSep);
             if length(fileSections) == 1;
                 lines = fileSections;
             else
-                lines = join(fileSections(1:2),'\\');
+                lines = join(fileSections(1:2), dubSep);
             end
             for i = 3:length(fileSections)
                 if length(lines{end}) + length(fileSections{i}) + 1 + 2 > 60
-                    lines{end+1} = ['\\',fileSections{i}];
+                    lines{end+1} = [dubSep, fileSections{i}];
                 else
-                    lines{end} = [lines{end},'\\',fileSections{i}];
+                    lines{end} = [lines{end}, dubSep,fileSections{i}];
                 end
             end
             format = '';

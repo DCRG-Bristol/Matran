@@ -78,7 +78,7 @@ classdef ScalarElement < mni.bulk.BulkData
     end
     
     methods % visualisation
-        function hg = drawElement(obj, ~, hAx, varargin)
+        function hg = drawElement(obj, ~, hAx, plotOpts)
 
             hg = [];
             
@@ -129,7 +129,9 @@ classdef ScalarElement < mni.bulk.BulkData
             else
                 xB = coords2(:, obj.Node2Index(idx));
             end
-            
+            x = plotOpts.A*x;;
+            xA = plotOpts.A*xA;
+            xB = plotOpts.A*xB;
             hg{1} = drawNodes(x, hAx, ...
                 'Marker'         , 's', ...
                 'MarkerFaceColor', 'b', ...

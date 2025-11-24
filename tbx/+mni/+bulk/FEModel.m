@@ -260,7 +260,12 @@ classdef FEModel < mni.mixin.Collector
     end
     
     methods % visualisation
-        function hg = draw(obj,hF,varargin)
+        function hg = draw(obj,hF,plotOpts)
+            arguments
+                obj
+                hF = figure('Name', 'Finite Element Model');
+                plotOpts = mni.bulk.PlotOpts()
+            end
             %draw Method for plotting the content of a FEModel.
             
             hg = [];
@@ -271,10 +276,7 @@ classdef FEModel < mni.mixin.Collector
                 return
             end
             UserData.obj = obj;
-            if nargin < 2 || isempty(hF)
-                hF  = figure('Name', 'Finite Element Model',...
-                    'UserData',UserData);
-            end
+            hF.UserData = UserData;
             hAx = axes('Parent', hF, 'NextPlot', 'add', 'Box', 'on');
             xlabel(hAx, 'X');
             ylabel(hAx, 'Y');
@@ -292,7 +294,7 @@ classdef FEModel < mni.mixin.Collector
             bulkNames = obj.BulkDataNames;
             hg = cell(1, numel(bulkNames));
             for iB = 1 : numel(bulkNames)
-                hg{iB} = drawElement(obj.(bulkNames{iB}), obj, hAx, varargin{:});
+                hg{iB} = drawElement(obj.(bulkNames{iB}), obj, hAx, plotOpts);
             end
             hg = horzcat(hg{:})';
             
@@ -300,32 +302,33 @@ classdef FEModel < mni.mixin.Collector
             axis(hAx, 'equal');
             
         end
-        function update(obj,varargin)
+        function update(obj,plotOpts)
+            arguments
+                obj
+                plotOpts = mni.bulk.PlotOpts()
+            end
             %Run 'updateElement' method for each bulk object in the model
             bulkNames = obj.BulkDataNames;
             for iB = 1 : numel(bulkNames)
-                obj.(bulkNames{iB}).updateElement(varargin{:});
+                obj.(bulkNames{iB}).updateElement(plotOpts);
             end
         end
-        function animate(obj,opts)
+        function animate(obj,plotOpts)
             arguments
                 obj
-                opts.Period double = 5;
-                opts.Scale double= 1;
-                opts.Cycles double = 3;
-                opts.gifFile (1,:) char = '';
+                plotOpts = mni.bulk.PlotOpts()
             end
             obj.StopAnimation = false;
             tic
             axis manual
-            phase = linspace(0,2*pi*opts.Cycles,20*opts.Period*opts.Cycles);
+            phase = linspace(0,2*pi*plotOpts.Cycles,20*plotOpts.Period*plotOpts.Cycles);
             for i=1:length(phase)
-                obj.update('Phase',phase(i),'Scale',opts.Scale);
-                if ~isempty(opts.gifFile)
+                obj.update(plotOpts);
+                if ~isempty(plotOpts.gifFile)
                     if i == 1
-                        exportgraphics(gcf,opts.gifFile);
+                        exportgraphics(gcf,plotOpts.gifFile);
                     else
-                        exportgraphics(gcf,opts.gifFile,Append=true);
+                        exportgraphics(gcf,plotOpts.gifFile,Append=true);
                     end
                 end
                 drawnow limitrate

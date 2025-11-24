@@ -31,8 +31,8 @@ classdef AeroPanel < mni.bulk.BulkData
                 'LSPAN' , 'AEFACT', 'SpanDivision', ...
                 'LCHORD', 'AEFACT', 'ChordDivision', ...
                 'CP', 'mni.bulk.CoordSystem', 'InputCoordSys'}, ...
-                'AttrList'   , {'X1', {'nrows', 3}, 'X4', {'nrows', 3}});            
-            varargin = parse(obj, varargin{:});
+                'AttrList'   , {'X1', {'nrows', 3}, 'X4', {'nrows', 3}});       
+            varargin = parse(obj, varargin{:});     
             preallocate(obj);
         end
     end
@@ -62,7 +62,7 @@ classdef AeroPanel < mni.bulk.BulkData
         function p = get_pressure(obj)
             p = abs(obj.PanelPressure);
         end
-        function hg = drawElement(obj, FEModel, hAx, varargin)
+        function hg = drawElement(obj, FEModel, hAx, plotOpts)
             %drawElement Draws the AeroPanel object as a single patch
             %object and returns a single graphics handle for all AeroPanels
             %in the collection.
@@ -92,6 +92,8 @@ classdef AeroPanel < mni.bulk.BulkData
                 obj.PanelForce = zeros(size(PanelData.IDs,1),6);
             end
             %Arrange vertex coordinates for vectorised plotting
+            Crot = pagemtimes(plotOpts.A, permute(PanelData.Coords, [3, 2, 1]));
+            PanelData.Coords = permute(Crot, [3, 2, 1]);
             x = PanelData.Coords(:, 1 : 4, 1)';
             y = PanelData.Coords(:, 1 : 4, 2)';
             z = PanelData.Coords(:, 1 : 4, 3)';
@@ -106,17 +108,22 @@ classdef AeroPanel < mni.bulk.BulkData
             
             % plot quiver
 %             if any(obj.PanelForce)
-                vec = bsxfun(@times,obj.PanelForce(:,3),PanelData.Norms);
-                obj.plotobj_quiver = quiver3(hAx,PanelData.Centre(:,1),...
-                    PanelData.Centre(:,2),PanelData.Centre(:,3),...
-                    vec(:,1),vec(:,2),vec(:,3),'r','Tag','Aero Force',...
-                'DeleteFcn',@obj.quiverDelete,'UserData',obj);            
+            PanelData.Centre = (plotOpts.A*PanelData.Centre')';
+            vec = bsxfun(@times,obj.PanelForce(:,3),-PanelData.Norms);
+            vec = (plotOpts.A*vec')';
+            obj.plotobj_quiver = quiver3(hAx,PanelData.Centre(:,1),...
+                PanelData.Centre(:,2),PanelData.Centre(:,3),...
+                vec(:,1),vec(:,2),vec(:,3),'r','Tag','Aero Force',...
+            'DeleteFcn',@obj.quiverDelete,'UserData',obj);            
 %             end
             hg(2) = obj.plotobj_quiver;
         end
-        function updateElement(obj,varargin)           
+        function updateElement(obj,plotOpts)           
             %Grab the panel data
             PanelData = getPanelData(obj,obj.XDir);
+            Crot = pagemtimes(plotOpts.A, permute(PanelData.Coords, [3, 2, 1]));
+            PanelData.Coords = permute(Crot, [3, 2, 1]);
+            PanelData.Centre = (plotOpts.A*PanelData.Centre')';
             %Arrange vertex coordinates for vectorised plotting
             x = PanelData.Coords(:, 1 : 4, 1)';
             y = PanelData.Coords(:, 1 : 4, 2)';
@@ -131,6 +138,7 @@ classdef AeroPanel < mni.bulk.BulkData
             %update quivers
             if ~isempty(obj.plotobj_quiver)
                 vec = bsxfun(@times,obj.PanelForce(:,3),PanelData.Norms);
+                vec = (plotOpts.A*vec')';
                 obj.plotobj_quiver.XData = PanelData.Centre(:,1);
                 obj.plotobj_quiver.YData = PanelData.Centre(:,2);
                 obj.plotobj_quiver.ZData = PanelData.Centre(:,3);
@@ -150,10 +158,12 @@ classdef AeroPanel < mni.bulk.BulkData
     end
     
     methods % helper functions 
-        function PanelData = getPanelData(obj,X_dir,varargin)
-            p = inputParser();
-            p.addParameter('local',false,@islogical);
-            p.parse(varargin{:});
+        function PanelData = getPanelData(obj,X_dir,local)
+            arguments
+                obj
+                X_dir
+                local logical = false
+            end
             
             %getPanelData Calculates the panel coordinates.                                 
             PanelData = repmat(struct('Coords', [], 'Centre', []), [1, obj.NumBulk]);
@@ -197,7 +207,7 @@ classdef AeroPanel < mni.bulk.BulkData
             for ii = 1:obj.NumBulk
                 obj_i = eid_order(ii);
                 %convert corners to global coordinate system
-                if isempty(obj.InputCoordSysIndex) || p.Results.local
+                if isempty(obj.InputCoordSysIndex) || local
                     X1 = obj.X1(:,obj_i);
                     X4 = obj.X4(:,obj_i);
                 else

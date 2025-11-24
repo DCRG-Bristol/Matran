@@ -30,8 +30,8 @@ classdef Mass < mni.bulk.BulkData
                 'PropMask'   , {'X', 3, 'I2', 2, 'I3', 3}, ...
                 'AttrList'   , {'X', {'nrows', 3}, 'I2', {'nrows', 2}, 'I3', {'nrows', 3}}, ...
                 'Connections', {'G', 'mni.bulk.Node', 'Nodes', 'CID', 'mni.bulk.CoordSystem', 'CoordSys'}, ...
-                'SetMethod',{'CID',@validateCID});                        
-            varargin = parse(obj, varargin{:});
+                'SetMethod',{'CID',@validateCID});
+            varargin = parse(obj, varargin{:});                   
             preallocate(obj);
             
         end
@@ -62,10 +62,12 @@ classdef Mass < mni.bulk.BulkData
     end
     
     methods % visualisation
-        function coords = get_drawCoords(obj,varargin)
-            p = obj.parseInput(varargin{:});
-            coords = getDrawCoords(obj.Nodes,'Mode',p.Results.Mode,...
-                'Scale',p.Results.Scale,'Phase',p.Results.Phase);
+        function coords = get_drawCoords(obj,plotOpts)
+            arguments
+                obj
+                plotOpts = mni.bulk.PlotOpts();
+            end
+            coords = getDrawCoords(obj.Nodes,plotOpts);
             if isempty(coords)
                 return
             end
@@ -92,21 +94,21 @@ classdef Mass < mni.bulk.BulkData
             end
         end
         
-        function hg = drawElement(obj, ~, hAx, varargin)            
+        function hg = drawElement(obj, ~, hAx, plotOpts)            
             hg = [];           
             if isempty(obj.Nodes)
                 return
             end            
-            coords = obj.get_drawCoords(varargin{:});            
+            coords = plotOpts.A*obj.get_drawCoords(plotOpts);            
             hg = drawNodes(coords, hAx, ...
                 'Marker', '^', 'MarkerFaceColor', 'b', 'Tag', 'Mass',...
                 'UserData',obj,'DeleteFcn',@obj.massDelete);
             obj.plotobj_mass = hg;
             
         end        
-        function updateElement(obj,varargin)            
+        function updateElement(obj,plotOpts)            
             if ~isempty(obj.plotobj_mass)
-                coords = obj.get_drawCoords(varargin{:});  
+                coords = plotOpts.A*obj.get_drawCoords(plotOpts);  
                 obj.plotobj_mass.XData = coords(1,:);
                 obj.plotobj_mass.YData = coords(2,:);
                 obj.plotobj_mass.ZData = coords(3,:);      
@@ -114,16 +116,6 @@ classdef Mass < mni.bulk.BulkData
         end
         end
     methods(Static,Hidden)
-        function p = parseInput(varargin)
-            expectedModes = {'undeformed','deformed'};
-            p = inputParser;
-            addParameter(p, 'AddOffset', true, @(x)validateattributes(x, {'logical'}, {'scalar'}));
-            addParameter(p,'Mode','deformed',...
-                @(x)any(validatestring(x,expectedModes)));
-            addParameter(p,'Scale',1);
-            addParameter(p,'Phase',0);
-            parse(p, varargin{:});
-        end
         function massDelete(~,~)
             h = gcbo;
             h.UserData.plotobj_mass = []; 

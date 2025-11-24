@@ -28,7 +28,6 @@ classdef Constraint < mni.bulk.BulkData
                 'H5ListName' , {'ID'}, ...
                 'Connections', {'G', 'mni.bulk.Node', 'Nodes'}, ...
                 'SetMethod'  , {'C', @validateDOF});
-
             varargin = parse(obj, varargin{:});
             preallocate(obj);
 
@@ -67,7 +66,7 @@ classdef Constraint < mni.bulk.BulkData
     end
 
     methods % visualisation
-        function hg = drawElement(obj, ~,hAx, varargin)
+        function hg = drawElement(obj, ~,hAx, plotOpts)
             %drawElement Draws the constraint objects as a discrete marker
             %at the specified nodes and returns a single handle for all the
             %beams in the collection.
@@ -78,10 +77,8 @@ classdef Constraint < mni.bulk.BulkData
                 return
             end
 
-            p = parseInput(varargin{:});
-            coords = getDrawCoords(obj.Nodes,'Mode',p.Results.Mode,...
-                'Scale',p.Results.Scale,'Phase',p.Results.Phase);
-            coords = coords(:, obj.NodesIndex);
+            coords = getDrawCoords(obj.Nodes,plotOpts);
+            coords = plotOpts.A*coords(:, obj.NodesIndex);
 
             switch obj.CardName
                 case 'SPC'
@@ -118,15 +115,4 @@ classdef Constraint < mni.bulk.BulkData
 
         end
     end
-end
-
-function p = parseInput(varargin)
-expectedModes = {'undeformed','deformed'};
-p = inputParser;
-addParameter(p, 'AddOffset', true, @(x)validateattributes(x, {'logical'}, {'scalar'}));
-addParameter(p,'Mode','deformed',...
-    @(x)any(validatestring(x,expectedModes)));
-addParameter(p,'Scale',1);
-addParameter(p,'Phase',0);
-parse(p, varargin{:});
 end

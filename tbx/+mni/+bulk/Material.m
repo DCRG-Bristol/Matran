@@ -18,7 +18,6 @@ classdef Material < mni.bulk.BulkData
                 'IDProp'     , 'MID', ...
                 'AttrList'   , {'E', {'nonnegative'}, 'G', {'nonnegative'}, 'NU',  {'>', -1, '<', 0.5}     , ...
                 'RHO', {'nonnegative'}, 'ST', {'nonnegative'}, 'SC', {'nonnegative'}, 'SS', {'nonnegative'}});
-            
             varargin = parse(obj, varargin{:});
             preallocate(obj);
             

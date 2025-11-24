@@ -47,7 +47,6 @@ classdef Node < mni.bulk.BulkData
                 'PropDefault', {''}   , ...
                 'IDProp'     , 'IDi'  , ...
                 'ListProp'   , {'IDi'});
-            
             varargin = parse(obj, varargin{:});
             preallocate(obj);
             
@@ -68,11 +67,11 @@ classdef Node < mni.bulk.BulkData
     end
     
     methods % visualisation
-        function hg = drawElement(obj, ~, hAx, varargin)
+        function hg = drawElement(obj, ~, hAx, plotOpts)
             %drawElement Draws the node objects as a discrete marker and
             %returns a single graphics handle for all the nodes in the
             %collection.            
-            coords = getDrawCoords(obj, varargin{:});
+            coords = plotOpts.A*getDrawCoords(obj, plotOpts);
             obj.plotobj_nodes = drawNodes(coords, hAx,'DeleteFcn',...
                 @obj.nodeDelete,'UserData',obj);
             hg = obj.plotobj_nodes;           
@@ -81,30 +80,23 @@ classdef Node < mni.bulk.BulkData
             h = gcbo;
             h.UserData.plotobj_nodes = [];
         end
-        function updateElement(obj, varargin)
+        function updateElement(obj, plotOpts)
             %drawElement Draws the node objects as a discrete marker and
             %returns a single graphics handle for all the nodes in the
             %collection.            
             if ~isempty(obj.plotobj_nodes)
-                coords = getDrawCoords(obj, varargin{:});
+                coords = plotOpts.A*getDrawCoords(obj, plotOpts);
                 obj.plotobj_nodes.XData = coords(1,:);
                 obj.plotobj_nodes.YData = coords(2,:);
                 obj.plotobj_nodes.ZData = coords(3,:);              
             end            
         end
-        function X = getDrawCoords(obj, varargin)
+        function X = getDrawCoords(obj, plotOpts)
             %getDrawCoords Returns the coordinates of the node in the
             %global (MSC.Nastran Basic) coordinate system based on the
             %current 'DrawMode' of the object.
             %
             % Accepts object arrays.
-            expectedModes = {'undeformed','deformed'};
-            p = inputParser;
-            addParameter(p,'Mode','deformed',...
-                @(x)any(validatestring(x,expectedModes)));
-            addParameter(p,'Scale',1);
-            addParameter(p,'Phase',0);
-            p.parse(varargin{:})
             
             %Assume the worst
             X = nan(3, numel(obj));
@@ -133,7 +125,7 @@ classdef Node < mni.bulk.BulkData
             
             %If the user wants the undeformed model then there is nothing
             %else to do
-            if strcmp(p.Results.Mode, 'undeformed')
+            if strcmp(plotOpts.Mode, 'undeformed')
                 return
             end
             
@@ -148,13 +140,13 @@ classdef Node < mni.bulk.BulkData
                 return
             end
             if size(dT{:},1) == 3
-                dT = dT{:}*p.Results.Scale;
+                dT = dT{:}*plotOpts.Scale;
             elseif size(dT{:},1) ~= 3 && size(dT{:},2) == 3
-                dT = dT{:}'*p.Results.Scale;           
+                dT = dT{:}'*plotOpts.Scale;           
             else
                 error('deformation data must have one dimension of length 3')
             end 
-            dT = abs(dT).*cos(angle(dT)+p.Results.Phase);
+            dT = abs(dT).*cos(angle(dT)+plotOpts.Phase);
             
 %             dT = horzcat(dT{:})*p.Results.Scale;
             

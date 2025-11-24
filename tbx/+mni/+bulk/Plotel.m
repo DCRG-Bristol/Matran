@@ -45,7 +45,7 @@ classdef Plotel < mni.bulk.BulkData
     end
     
     methods % visualisation
-        function hg = drawElement(obj, ~, hAx, varargin)
+        function hg = drawElement(obj, ~, hAx, plotOpts)
             %drawElement Draws the beam objects as a line object between
             %the nodes and returns a single handle for all the beams in the
             %collection.
@@ -56,19 +56,19 @@ classdef Plotel < mni.bulk.BulkData
                 return
             end
             
-            coords = getDrawCoords(obj.Nodes, varargin{:});            
-            xA     = coords(:, obj.NodesIndex(1, :));
-            xB     = coords(:, obj.NodesIndex(2, :));  
+            coords = getDrawCoords(obj.Nodes, plotOpts);            
+            xA     = plotOpts.A*coords(:, obj.NodesIndex(1, :));
+            xB     = plotOpts.A*coords(:, obj.NodesIndex(2, :));  
             
             hg = drawLines(xA, xB, hAx,'Tag','Plotel','Color','k',...
                 'UserData',obj,'DeleteFcn',@obj.plotelDelete);
             obj.plotobj_plotel = hg;            
         end        
-        function updateElement(obj,varargin)
+        function updateElement(obj,plotOpts)
             if ~isempty(obj.plotobj_plotel)
-                coords = getDrawCoords(obj.Nodes,varargin{:});            
-                xA     = coords(:, obj.NodesIndex(1, :));
-                xB     = coords(:, obj.NodesIndex(2, :));
+                coords = getDrawCoords(obj.Nodes,plotOpts);            
+                xA     = plotOpts.A*coords(:, obj.NodesIndex(1, :));
+                xB     = plotOpts.A*coords(:, obj.NodesIndex(2, :));
 
                 x  = padCoordsWithNaN([xA(1, :) ; xB(1, :)]);
                 y  = padCoordsWithNaN([xA(2, :) ; xB(2, :)]);
