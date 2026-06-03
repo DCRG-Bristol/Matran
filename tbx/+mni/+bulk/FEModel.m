@@ -323,6 +323,7 @@ classdef FEModel < mni.mixin.Collector
             axis manual
             phase = linspace(0,2*pi*plotOpts.Cycles,20*plotOpts.Period*plotOpts.Cycles);
             for i=1:length(phase)
+                plotOpts.Phase = phase(i);
                 obj.update(plotOpts);
                 if ~isempty(plotOpts.gifFile)
                     if i == 1
