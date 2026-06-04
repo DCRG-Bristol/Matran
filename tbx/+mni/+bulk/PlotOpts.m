@@ -2,8 +2,9 @@ classdef PlotOpts
     properties
         Scale double = 1;
         Mode char {mustBeMember(Mode,{'undeformed','deformed'})} = 'deformed';
+        Period double = 1; % for animations
         Phase double = 0;
-        Cycles = 1; % for animatitions
+        Cycles = 1; % for animations
         gifFile char = ''
         A (3,3) double = eye(3); % Rotation matrix
     end
