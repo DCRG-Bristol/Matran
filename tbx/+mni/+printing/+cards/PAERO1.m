@@ -13,29 +13,41 @@ classdef PAERO1 < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = PAERO1(PID,varargin)
+        function obj = PAERO1(PID,B1,B2,B3,B4,B5,B6)
             %GRID_CARD Construct an instance of this class
             %   Detailed explanation goes here
-            p = inputParser();
-            p.addRequired('PID',@(x)x>0)
-            p.addOptional('B1',[],@(x)x>0)
-            p.addOptional('B2',[],@(x)x>0)
-            p.addOptional('B3',[],@(x)x>0)
-            p.addOptional('B4',[],@(x)x>0)
-            p.addOptional('B5',[],@(x)x>0)
-            p.addOptional('B6',[],@(x)x>0)
-            p.parse(PID,varargin{:})
+            arguments
+                PID {mustBeGreaterThan(PID,0)}
+                B1 double {mni.printing.cards.mustBeEmptyOrGreaterThan(B1,0)} = []
+                B2 double {mni.printing.cards.mustBeEmptyOrGreaterThan(B2,0)} = []
+                B3 double {mni.printing.cards.mustBeEmptyOrGreaterThan(B3,0)} = []
+                B4 double {mni.printing.cards.mustBeEmptyOrGreaterThan(B4,0)} = []
+                B5 double {mni.printing.cards.mustBeEmptyOrGreaterThan(B5,0)} = []
+                B6 double {mni.printing.cards.mustBeEmptyOrGreaterThan(B6,0)} = []
+            end
             
             obj.Name = 'PAERO1';
-            names = fieldnames(p.Results);
-            for i = 1:length(names)
-                obj.(names{i}) = p.Results.(names{i});
-            end               
+            obj.PID = PID;
+            obj.B1 = B1;
+            obj.B2 = B2;
+            obj.B3 = B3;
+            obj.B4 = B4;
+            obj.B5 = B5;
+            obj.B6 = B6;
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.PID},{obj.B1},{obj.B2},...
                 {obj.B3},{obj.B4},{obj.B5},{obj.B6}];
             format = 'iiiiiii';            

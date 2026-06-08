@@ -19,16 +19,17 @@ classdef TABDMP1 < mni.printing.cards.BaseCard
             % F1, F2, NE, ND, NORM, G, C
             %
             % see NASTRAN users guide for more info
-            types = {'G','CRIT','Q'};
+            arguments
+                TID {mustBeGreaterThan(TID,0)}
+                TYPE {mustBeMember(TYPE,{'G','CRIT','Q'})}
+                Fs
+                Gs
+            end
             if numel(Fs)~=numel(Gs)
                 error('Fs and Gs must be the same length')
-            end            
-            p = inputParser();
-            p.addRequired('TID',@(x)x>0)
-            p.addRequired('TYPE',@(x)any(validatestring(x,types)))
-            p.addRequired('Fs',@(x)numel(x)>1 && all(x>=0))
-            p.addRequired('Gs',@(x)numel(x)>1)            
-            p.parse(TID,TYPE,Fs,Gs)  
+            end
+            assert(numel(Fs)>1 && all(Fs>=0))
+            assert(numel(Gs)>1)
 
             obj.TID = TID;
             obj.TYPE = TYPE;
@@ -38,9 +39,18 @@ classdef TABDMP1 < mni.printing.cards.BaseCard
             
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.TID},{obj.TYPE}];
             format = 'isn';
             for i = 1:length(obj.Fs)

@@ -23,7 +23,15 @@ classdef MKAERO1 < mni.printing.cards.BaseCard
 
         end
 
-        function writeToFile(obj,fid,varargin)
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+
             %writeToFile print DMI entry to file
             tmpMs = nan(1,8*ceil(length(obj.Ms)/8));
             tmpKs = nan(1,8*ceil(length(obj.Ks)/8));
@@ -36,7 +44,9 @@ classdef MKAERO1 < mni.printing.cards.BaseCard
                 for j = 1:size(tmpKs,2)
                     Midx = find(~isnan(tmpMs(:,i)),1,'last');
                     Kidx = find(~isnan(tmpKs(:,j)),1,'last');
-                    writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+                    if bComment %Comments by standard
+                        mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+                    end
                     data = [];
                     format = '';
                     for k = 1:Midx

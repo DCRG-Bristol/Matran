@@ -10,17 +10,19 @@ classdef AELINK < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = AELINK(LABLD,LABLn_Cn,varargin)
+        function obj = AELINK(LABLD,LABLn_Cn,opts)
             %AELINK Construct an instance of this class
             % see NASTRAN Quick Ref Guide for info on AELINK
             % Inputs:
             %   - ID: integer specifing which trim case it applies to ()
             %
-            p = inputParser();
-            p.addParameter('ID',0);
-            p.parse(varargin{:});
+            arguments
+                LABLD
+                LABLn_Cn
+                opts.ID = 0
+            end
             
-            obj.ID = p.Results.ID;
+            obj.ID = opts.ID;
             obj.LABLD = LABLD;
             
             for i = 1:length(LABLn_Cn)
@@ -33,9 +35,18 @@ classdef AELINK < mni.printing.cards.BaseCard
             obj.Name = 'AELINK';
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             if obj.ID == 0
                 data = [{'ALWAYS'},{obj.LABLD}];
                 format = 'ss';

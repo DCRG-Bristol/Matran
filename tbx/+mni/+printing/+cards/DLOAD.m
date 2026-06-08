@@ -11,15 +11,15 @@ classdef DLOAD < mni.printing.cards.BaseCard
     
     methods
         function obj = DLOAD(SID,S,Ss,Ls)
+            arguments
+                SID {mustBeGreaterThan(SID,0)}
+                S
+                Ss {mustBeNonempty}
+                Ls {mustBeNonempty}
+            end
             if numel(Ss)~=numel(Ls)
                 error('Ss and Ls must be the same length')
-            end            
-            p = inputParser();
-            p.addRequired('SID',@(x)x>0)
-            p.addRequired('S')
-            p.addRequired('Ss',@(x)numel(x)>=1)
-            p.addRequired('Ls',@(x)numel(x)>=1)            
-            p.parse(SID,S,Ss,Ls)  
+            end
 
             obj.SID = SID;
             obj.S = S;
@@ -29,9 +29,18 @@ classdef DLOAD < mni.printing.cards.BaseCard
             
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.SID},{obj.S}];
             format = 'ir';
             for i = 1:length(obj.Ss)

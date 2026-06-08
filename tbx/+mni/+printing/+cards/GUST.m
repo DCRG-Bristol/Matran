@@ -14,13 +14,13 @@ classdef GUST < mni.printing.cards.BaseCard
         function obj = GUST(SID,DLOAD,WG,X0,V)
             %FLUTTER_CARD Construct an instance of this class
             %   Detailed explanation goes here
-            p = inputParser();
-            p.addRequired('SID',@(x)x>0);
-            p.addRequired('DLOAD',@(x)x>0);
-            p.addRequired('WG',@(x)x~=0);
-            p.addRequired('X0');
-            p.addRequired('V',@(x)x>0);
-            p.parse(SID,DLOAD,WG,X0,V);
+            arguments
+                SID {mustBeGreaterThan(SID,0)}
+                DLOAD {mustBeGreaterThan(DLOAD,0)}
+                WG {mustBeNonzero}
+                X0
+                V {mustBeGreaterThan(V,0)}
+            end
 
             obj.SID = SID;
             obj.DLOAD = DLOAD;
@@ -30,9 +30,18 @@ classdef GUST < mni.printing.cards.BaseCard
             obj.Name = 'GUST';
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.SID},{obj.DLOAD},{obj.WG},{obj.X0},{obj.V}];
             format = 'iirrr';
             obj.fprint_nas(fid,format,data);

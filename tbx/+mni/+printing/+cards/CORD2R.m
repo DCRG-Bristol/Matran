@@ -11,29 +11,39 @@ classdef CORD2R < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = CORD2R(CID,A,B,C,varargin)
+        function obj = CORD2R(CID,A,B,C,opts)
             %GRID_CARD Construct an instance of this class
             %   Detailed explanation goes here
-            p = inputParser();
-            p.addRequired('CID',@(x)x>0) 
-            p.addRequired('A',@(x)numel(x)==3)
-            p.addRequired('B',@(x)numel(x)==3)
-            p.addRequired('C',@(x)numel(x)==3)
-            p.addParameter('RID',0,@(x)x>=0)
-            p.addParameter('LongFormat',false,@(x)islogical(x))
-            p.parse(CID,A,B,C,varargin{:})
+            arguments
+                CID {mustBeGreaterThan(CID,0)}
+                A (3,1) double
+                B (3,1) double
+                C (3,1) double
+                opts.RID {mni.printing.cards.mustBeValidID(opts.RID,0)} = 0
+                opts.LongFormat logical = false
+            end
             
             obj.Name = 'CORD2R';
-            obj.CID = p.Results.CID;
-            obj.RID = p.Results.RID;
-            obj.A = p.Results.A;
-            obj.B = p.Results.B;
-            obj.C = p.Results.C;            
+            obj.CID = CID;
+            obj.RID = opts.RID;
+            obj.A = A;
+            obj.B = B;
+            obj.C = C;
+            obj.LongFormat = opts.LongFormat;
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.CID},{obj.RID},...
                 {obj.A(1)},{obj.A(2)},{obj.A(3)},...
                 {obj.B(1)},{obj.B(2)},{obj.B(3)},...

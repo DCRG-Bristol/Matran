@@ -18,7 +18,7 @@ classdef CAERO1 < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = CAERO1(EID,PID,P1,P4,X12,X43,IGID,varargin)
+        function obj = CAERO1(EID,PID,P1,P4,X12,X43,IGID,opts)
             %CAERO1 Construct an instance of this class
             %   required inputs are as follows:
             % EID - element identification
@@ -37,32 +37,48 @@ classdef CAERO1 < mni.printing.cards.BaseCard
             % LCHORD - ID for AEFACT for chordwise panels
             %
             % see NASTRAN users guide for more info
-            p = inputParser();
-            p.addRequired('EID')
-            p.addRequired('PID')
-            p.addRequired('P1',@(x)numel(x)==3)
-            p.addRequired('P4',@(x)numel(x)==3)
-            p.addRequired('X12')
-            p.addRequired('X43')
-            p.addRequired('IGID')
-            p.addParameter('CP',0,@(x)x>=0)
-            p.addParameter('NSPAN',[],@(x)x>0)
-            p.addParameter('NCHORD',[],@(x)x>0)
-            p.addParameter('LSPAN',[],@(x)x>0)
-            p.addParameter('LCHORD',[],@(x)x>0)
-            
-            p.parse(EID,PID,P1,P4,X12,X43,IGID,varargin{:})
-            
-            names = fieldnames(p.Results);
-            for i = 1:length(names)
-                obj.(names{i}) = p.Results.(names{i});
-            end   
+            arguments
+                EID
+                PID
+                P1 (3,1) double
+                P4 (3,1) double
+                X12
+                X43
+                IGID
+                opts.CP {mni.printing.cards.mustBeValidID(opts.CP,0)} = 0
+                opts.NSPAN {mni.printing.cards.mustBeValidID(opts.NSPAN,1)} = []
+                opts.NCHORD {mni.printing.cards.mustBeValidID(opts.NCHORD,1)} = []
+                opts.LSPAN {mni.printing.cards.mustBeValidID(opts.LSPAN,1)} = []
+                opts.LCHORD {mni.printing.cards.mustBeValidID(opts.LCHORD,1)} = []
+            end
+
+            obj.EID = EID;
+            obj.PID = PID;
+            obj.CP = opts.CP;
+            obj.NSPAN = opts.NSPAN;
+            obj.NCHORD = opts.NCHORD;
+            obj.LSPAN = opts.LSPAN;
+            obj.LCHORD = opts.LCHORD;
+            obj.IGID = IGID;
+            obj.P1 = P1;
+            obj.P4 = P4;
+            obj.X12 = X12;
+            obj.X43 = X43;
             obj.Name = 'CAERO1';
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.EID},{obj.PID},{obj.CP},...
                 {obj.NSPAN},{obj.NCHORD},{obj.LSPAN},{obj.LCHORD},...
                 {obj.IGID},{obj.P1(1)},{obj.P1(2)},{obj.P1(3)},...

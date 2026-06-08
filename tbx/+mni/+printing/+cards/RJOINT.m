@@ -10,26 +10,35 @@ classdef RJOINT < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = RJOINT(EID,GA,GB,varargin)
+        function obj = RJOINT(EID,GA,GB,opts)
             %GRID_CARD Construct an instance of this class
             %   Detailed explanation goes here
-            p = inputParser();
-            p.addRequired('EID',@(x)x>0)
-            p.addRequired('GA',@(x)x>0)
-            p.addRequired('GB',@(x)x>0)
-            p.addParameter('CB','')
-            p.parse(EID,GA,GB,varargin{:})
-            
-            names = fieldnames(p.Results);
-            for i = 1:length(names)
-                obj.(names{i}) = p.Results.(names{i});
+            arguments
+                EID {mustBeGreaterThan(EID,0)}
+                GA {mustBeGreaterThan(GA,0)}
+                GB {mustBeGreaterThan(GB,0)}
+                opts.CB = ''
             end
+
+            obj.EID = EID;
+            obj.GA = GA;
+            obj.GB = GB;
+            obj.CB = opts.CB;
             obj.Name = 'RJOINT';          
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.EID},{obj.GA},{obj.GB},{obj.CB}];
             format = 'iiis';
             obj.fprint_nas(fid,format,data);

@@ -13,15 +13,17 @@ classdef BaseCard < matlab.mixin.Heterogeneous
             %   Detailed explanation goes here
         end
         
-        function writeToFile(obj,fid,varargin)
+        function writeToFile(obj,fid,bComment)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
-            p = inputParser();
-            p.addOptional('bComment',false);
-            p.parse(varargin{:})
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
             
-            if p.Results.bComment %Comments by standard
-                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card Not Implemented'],fid)
             end
         end
     

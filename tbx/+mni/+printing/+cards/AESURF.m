@@ -22,40 +22,64 @@ classdef AESURF < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = AESURF(ID,LABEL,CID1,ALID1,varargin)
+        function obj = AESURF(ID,LABEL,CID1,ALID1,opts)
             %FLUTTER_CARD Construct an instance of this class
             %   Detailed explanation goes here
-            expectedLDW = {'LDW','NOLDW'};
-            p = inputParser();
-            
-            p.addRequired('ID',@(x)x>0)
-            p.addRequired('LABEL',@(x)ischar(x)||isstring(x))
-            p.addRequired('CID1',@(x)x>0)
-            p.addRequired('ALID1',@(x)x>0)
-            p.addParameter('CID2','',@(x)x>0)
-            p.addParameter('ALID2','',@(x)x>0)
-            p.addParameter('EFF',[],@(x)x~=0)
-            p.addParameter('LDW','',@(x)any(validatestring(x,expectedLDW)))
-            p.addParameter('CREFC','',@(x)x>0)
-            p.addParameter('CREFS','',@(x)x>0)
-            p.addParameter('PLLIM','')
-            p.addParameter('PULIM','')
-            p.addParameter('HMLLIM','')
-            p.addParameter('HMULIM','')
-            p.addParameter('TQLLIM','')
-            p.addParameter('TQULIM','')
-            
-            p.parse(ID,LABEL,CID1,ALID1,varargin{:})
-            names = fieldnames(p.Results);
-            for i = 1:length(names)
-                obj.(names{i}) = p.Results.(names{i});
+            arguments
+                ID {mustBeGreaterThan(ID,0)}
+                LABEL {mustBeTextScalar}
+                CID1 {mustBeGreaterThan(CID1,0)}
+                ALID1 {mustBeGreaterThan(ALID1,0)}
+                opts.CID2 double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.CID2,0)} = []
+                opts.ALID2 double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.ALID2,0)} = []
+                opts.EFF = []
+                opts.LDW {mni.printing.cards.mustBeEmptyOrMember(opts.LDW,{'LDW','NOLDW'})} = ''
+                opts.CREFC double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.CREFC,0)} = []
+                opts.CREFS double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.CREFS,0)} = []
+                opts.PLLIM = ''
+                opts.PULIM = ''
+                opts.HMLLIM = ''
+                opts.HMULIM = ''
+                opts.TQLLIM = ''
+                opts.TQULIM = ''
             end
+            if ~isempty(opts.EFF)
+                if opts.EFF == 0
+                    error('EFF must be non-zero when supplied.')
+                end
+            end
+
+            obj.ID = ID;
+            obj.LABEL = LABEL;
+            obj.CID1 = CID1;
+            obj.ALID1 = ALID1;
+            obj.CID2 = opts.CID2;
+            obj.ALID2 = opts.ALID2;
+            obj.EFF = opts.EFF;
+            obj.LDW = opts.LDW;
+            obj.CREFC = opts.CREFC;
+            obj.CREFS = opts.CREFS;
+            obj.PLLIM = opts.PLLIM;
+            obj.PULIM = opts.PULIM;
+            obj.HMLLIM = opts.HMLLIM;
+            obj.HMULIM = opts.HMULIM;
+            obj.TQLLIM = opts.TQLLIM;
+            obj.TQULIM = opts.TQULIM;
             obj.Name = 'AESURF';
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.ID},{obj.LABEL},{obj.CID1},{obj.ALID1}...
                 {obj.CID2},{obj.ALID2},{obj.EFF},{obj.LDW},{obj.CREFC},...
                 {obj.CREFS},{obj.PLLIM},{obj.PULIM},{obj.HMLLIM},...

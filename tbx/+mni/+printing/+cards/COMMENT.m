@@ -13,7 +13,15 @@ classdef COMMENT < mni.printing.cards.BaseCard
             obj.comment = comment;         
         end
         
-        function writeToFile(obj,fid,varargin)
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
             %writeToFile print DMI entry to file
             mni.printing.bdf.writeComment(obj.comment,fid)
         end

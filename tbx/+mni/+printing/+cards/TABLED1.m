@@ -11,31 +11,41 @@ classdef TABLED1 < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = TABLED1(TID,Xs,Ys,varargin)
-            types = {'LINEAR','LOG'};
+        function obj = TABLED1(TID,Xs,Ys,opts)
+            arguments
+                TID {mustBeGreaterThan(TID,0)}
+                Xs
+                Ys
+                opts.XAXIS {mni.printing.cards.mustBeEmptyOrMember(opts.XAXIS,{'LINEAR','LOG'})} = []
+                opts.YAXIS {mni.printing.cards.mustBeEmptyOrMember(opts.YAXIS,{'LINEAR','LOG'})} = []
+            end
             if numel(Xs)~=numel(Ys)
                 error('xs and Ys must be the same length')
-            end            
-            p = inputParser();
-            p.addRequired('TID',@(x)x>0);
-            p.addRequired('Xs',@(x)numel(x)>1);
-            p.addRequired('Ys',@(x)numel(x)>1);
-            p.addParameter('XAXIS',[],@(x)any(validatestring(x,types)));
-            p.addParameter('YAXIS',[],@(x)any(validatestring(x,types)));
-            p.parse(TID,Xs,Ys,varargin{:}); 
+            end
+            assert(numel(Xs)>1)
+            assert(numel(Ys)>1)
 
             obj.TID = TID;
             obj.Xs = Xs;
             obj.Ys = Ys;
-            obj.XAXIS = p.Results.XAXIS;  
-            obj.YAXIS = p.Results.YAXIS; 
+            obj.XAXIS = opts.XAXIS;
+            obj.YAXIS = opts.YAXIS;
             obj.Name = 'TABLED1';
             
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.TID},{obj.XAXIS},{obj.YAXIS}];
             format = 'issn';
             for i = 1:length(obj.Xs)

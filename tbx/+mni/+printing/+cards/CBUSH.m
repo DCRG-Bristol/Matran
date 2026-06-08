@@ -17,39 +17,38 @@ classdef CBUSH < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = CBUSH(EID,PID,GA,GB,varargin)
+        function obj = CBUSH(EID,PID,GA,GB,opts)
             %GRID_CARD Construct an instance of this class
             %   Detailed explanation goes here
-            p = inputParser();
-            p.addRequired('EID',@(x)x>0)
-            p.addRequired('PID',@(x)x>0)
-            p.addRequired('GA',@(x)x>0)
-            p.addOptional('GB',[],@(x)x>=0)
-            p.addParameter('X',[],@(x)numel(x)==3)
-            p.addParameter('G0',[],@(x)x>0)
-            p.addParameter('CID',[],@(x)x>0)
-           
-            p.parse(EID,PID,GA,GB,varargin{:})
+            arguments
+                EID {mustBeGreaterThan(EID,0)}
+                PID {mustBeGreaterThan(PID,0)}
+                GA {mustBeGreaterThan(GA,0)}
+                GB double {mni.printing.cards.mustBeEmptyOrGreaterThanOrEqual(GB,0)} = []
+                opts.X double {mni.printing.cards.mustBeEmptyOr3x1Vec(opts.X)} = []
+                opts.G0 double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.G0,0)} = []
+                opts.CID double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.CID,0)} = []
+            end
             
             obj.Name = 'CBUSH';
-            obj.EID = p.Results.EID;
-            obj.PID = p.Results.PID;
-            obj.GA = p.Results.GA;
-            obj.GB = p.Results.GB;
-            obj.CID = p.Results.CID;
+            obj.EID = EID;
+            obj.PID = PID;
+            obj.GA = GA;
+            obj.GB = GB;
+            obj.CID = opts.CID;
             
-            if ~isempty(p.Results.CID)
-                obj.CID = p.Results.CID;
+            if ~isempty(opts.CID)
+                obj.CID = opts.CID;
                 obj.vectorType = 'cid';
             else            
-                if xor(isempty(p.Results.G0),isempty(p.Results.X))
-                    if ~isempty(p.Results.G0)
-                        obj.G0 = p.Results.G0;
+                if xor(isempty(opts.G0),isempty(opts.X))
+                    if ~isempty(opts.G0)
+                        obj.G0 = opts.G0;
                         obj.vectorType = 'g0';
                     else
-                        obj.X1 = p.Results.X(1);
-                        obj.X2 = p.Results.X(2);
-                        obj.X3 = p.Results.X(3);
+                        obj.X1 = opts.X(1);
+                        obj.X2 = opts.X(2);
+                        obj.X3 = opts.X(3);
                         obj.vectorType = 'x';
                     end
                 else
@@ -58,9 +57,18 @@ classdef CBUSH < mni.printing.cards.BaseCard
             end
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             
             data = [{obj.EID},{obj.PID},{obj.GA},{obj.GB}];
             format = 'iiii';
