@@ -1,4 +1,4 @@
-function varargout = import_matran(filename, varargin)
+function varargout = import_matran(filename, options)
 %import_matran Entry point function for importing data into the Matran
 %framework.
 %
@@ -7,7 +7,7 @@ function varargout = import_matran(filename, varargin)
 %       >> MatranData = import_matran();
 %
 %   - Importing Matran data using 'uigetfile' and using parameters
-%       >> MatranData = import_matran([], 'Param1', val1, ...)
+%       >> MatranData = import_matran("", 'Param1', val1, ...)
 %
 %	- Importing a FE model from text file (.bdf, .dat)
 %       >> FEM = import_matran('models/uob_harw_R.bdf')
@@ -48,23 +48,46 @@ function varargout = import_matran(filename, varargin)
 % TODO - Add .f06 output reading
 % TODO - Add .op2 output reading
 
+arguments
+    filename string = ""
+    options.LogFcn (1, 1) function_handle = @logger
+    options.Verbose (1, 1) logical = true
+    options.ImportMode = 'both'
+end
+
 varargout = {[]};
 
-%descriptor, extensions, import function
 prmpt = 'Select a file to import';
-file_map = { ...
-    {'Nastran bulk data files', 'Nastran h5 files'}, ...
-    {{'.dat', '.bdf', '.pch'}         , {'.h5'}}           , ...
-    {@importBulkData          , @importH5} ; ...
-    {''}, {{''}}, {}};
+file_filter = {'*.dat;*.bdf;*.pch;*.h5', 'Supported files (*.dat, *.bdf, *.pch, *.h5)'};
 
-if nargin < 1 || isempty(filename)
-   filename = []; 
+if strlength(filename) == 0
+    [filename_, filepath] = uigetfile(file_filter, prmpt);
+    if isnumeric(filename_) && isnumeric(filepath)
+        return
+    end
+    filename = string(fullfile(filepath, filename_));
 end
-[filename, import_fcn, log_fcn, args] = parse_inputs(prmpt, file_map, filename, varargin{:});
-if isempty(filename)
-    return
+
+[~, ~, ext] = fileparts(filename);
+ext = lower(char(ext));
+switch lower(ext)
+    case {'.dat', '.bdf', '.pch'}
+        import_fcn = @importBulkData;
+    case '.h5'
+        import_fcn = @importH5;
+    otherwise
+        error('Unsupported file extension: ''%s''.', ext);
 end
+
+if options.Verbose
+    log_fcn = options.LogFcn;
+else
+    log_fcn = @(varargin) []; %dummy function
+end
+
+%Construct additional arguments to be passed straight to import method
+args = {'ImportMode', options.ImportMode};
+filename = char(filename);
 
 %Import the data
 [MatranData, Meta] = import_fcn(filename, log_fcn, args{:});
@@ -92,75 +115,6 @@ if any(idxRes) && any(idxModel)
 end
 
 varargout{1} = MatranData;
-
-end
-
-function [filename, import_fcn, log_fcn, args] = parse_inputs(prmpt, file_map, filename, varargin)
-%parse_inputs Checks the user inputs and returns the file name, import
-%function handle and logging function handle.
-
-import_fcn = [];
-
-%Parse parameters
-p = inputParser;
-addParameter(p, 'LogFcn' , @logger, @(x)isa(x, 'function_handle'));
-addParameter(p, 'Verbose', true   , @(x)validateattributes(x, {'logical'}, {'scalar'})); 
-addParameter(p, 'ImportMode', 'both');
-parse(p, varargin{:});
-if p.Results.Verbose
-    log_fcn = p.Results.LogFcn;
-else
-    log_fcn = @(s, a, b) fprintf(''); %dummy function 
-end
-
-%Construct additional arguments to be passed straight to import method
-args = {'ImportMode', p.Results.ImportMode};
-
-%Number of categories of files we are dealing with
-%   - e.g. input data, results, etc.
-nType    = size(file_map, 1); 
-
-if isempty(filename) %Ask the user
-    %Make the file-extension mapping for uigetfile
-    strs = cell(1, nType);
-    exts = cell(1, nType);
-    for jj = 1 : nType
-       ext_      = cellfun(@(x) strcat('*', x), file_map{jj, 2}, 'Unif', false);
-       strs{jj}  = arrayfun(@(ii) sprintf('%s (%s)', file_map{jj, 1}{ii}, ...
-            strjoin(strcat(ext_{ii}, ','))), 1 : numel(file_map{jj, 1}), 'Unif', false);
-       exts{jj}  = cellfun(@(x) strjoin(x, '; '), ext_, 'Unif', false);
-    end
-    %Ask the user where the file is
-    [filename, filepath] = uigetfile([horzcat(exts{:}) ; horzcat(strs{:})]', prmpt);
-    if isnumeric(filename) && isnumeric(filepath)    
-        filename = [];
-        return
-    else
-        filename = fullfile(filepath, filename);
-    end
-end
-
-validateattributes(filename, {'char'}, {'row', 'nonempty'}, mfilename, 'filename');
-
-%Check file exists and is of the correct type
-listValidExt = horzcat(file_map{:, 2});
-allValidExt  = horzcat(listValidExt{:});
-assert(exist(filename, 'file') == 2, ['File ''%s'' does not exist. Check ', ...
-    'the filename and try again.'], filename);
-[~, ~, ext] = fileparts(filename);
-assert(any(strcmp(ext, allValidExt)), ['Expected the file to have one ', ...
-    'of the following extensions:\n\n\t%s'], strjoin(allValidExt, '\n\t'));
-
-%Associate extension with a particular row in the map
-idx_type = false(nType, 1);
-for ii = 1 : nType
-    temp = file_map{ii, 2};
-    idx_type(ii) = any(contains(horzcat(temp{:}), ext));
-end
-
-%Find the import function that corresponds to this extension
-idx_fcn = cellfun(@(ext_list) any(contains(ext_list, ext)), listValidExt);
-import_fcn = file_map{idx_type, 3}{idx_fcn};
 
 end
 
