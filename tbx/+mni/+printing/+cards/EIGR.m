@@ -15,7 +15,7 @@ classdef EIGR < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = EIGR(SID,METHOD,varargin)
+        function obj = EIGR(SID,METHOD,opts)
             %CAERO1 Construct an instance of this class
             %   required inputs are as follows:
             % SID,METHOD
@@ -24,26 +24,27 @@ classdef EIGR < mni.printing.cards.BaseCard
             % F1, F2, NE, ND, NORM, G, C
             %
             % see NASTRAN users guide for more info
-            methods = {'LAN','AHOU','INV','SINV','GIV','MGIV','HOU',...
-                'MHOU','AGIV'};
-            norms = {'MASS','MAX','POINT'};
-            
-            p = inputParser();
-            p.addRequired('SID',@(x)x>0)
-            p.addRequired('METHOD',@(x)any(validatestring(x,methods)))
-            p.addParameter('F1',[],@(x)x>=0)
-            p.addParameter('F2',[],@(x)x>0)
-            p.addParameter('NE',[],@(x)x>0)
-            p.addParameter('ND',[],@(x)x>=0)
-            p.addParameter('NORM',[],@(x)any(validatestring(x,norms)))
-            p.addParameter('G',[],@(x)x>0)
-            p.addParameter('C',[],@(x)x>=1 && x<=6)
-            
-            p.parse(SID,METHOD,varargin{:})            
-            names = fieldnames(p.Results);
-            for i = 1:length(names)
-                obj.(names{i}) = p.Results.(names{i});
-            end   
+            arguments
+                SID {mustBeGreaterThan(SID,0)}
+                METHOD {mustBeMember(METHOD,{'LAN','AHOU','INV','SINV','GIV','MGIV','HOU','MHOU','AGIV'})}
+                opts.F1 double {mni.printing.cards.mustBeEmptyOrGreaterThanOrEqual(opts.F1,0)} = []
+                opts.F2 double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.F2,0)} = []
+                opts.NE double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.NE,0)} = []
+                opts.ND double {mni.printing.cards.mustBeEmptyOrGreaterThanOrEqual(opts.ND,0)} = []
+                opts.NORM {mni.printing.cards.mustBeEmptyOrMember(opts.NORM,{'MASS','MAX','POINT'})} = []
+                opts.G double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.G,0)} = []
+                opts.C double {mni.printing.cards.mustBeEmptyOrInRange(opts.C,1,6)} = []
+            end
+
+            obj.SID = SID;
+            obj.METHOD = METHOD;
+            obj.F1 = opts.F1;
+            obj.F2 = opts.F2;
+            obj.NE = opts.NE;
+            obj.ND = opts.ND;
+            obj.NORM = opts.NORM;
+            obj.G = opts.G;
+            obj.C = opts.C;
             obj.Name = 'EIGR';
             
             if ~isempty(obj.F1)
@@ -56,9 +57,18 @@ classdef EIGR < mni.printing.cards.BaseCard
             end
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.SID},{obj.METHOD},{obj.F1},...
                 {obj.F2},{obj.NE},{obj.ND},{obj.NORM},...
                 {obj.G},{obj.C}];

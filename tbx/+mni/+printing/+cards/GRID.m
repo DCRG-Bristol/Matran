@@ -18,10 +18,10 @@ classdef GRID < mni.printing.cards.BaseCard
             arguments
                 ID {mustBeGreaterThanOrEqual(ID,0)}
                 X (3,1) double
-                opts.CP {validateEmptyInt(opts.CP,0)} = [];
-                opts.CD {validateEmptyInt(opts.CD,-1)} = [];
+                opts.CP {mni.printing.cards.mustBeValidID(opts.CP,0)} = [];
+                opts.CD {mni.printing.cards.mustBeValidID(opts.CD,-1)} = [];
                 opts.PS = '';
-                opts.SEID {validateEmptyInt(opts.SEID,0)} = [];
+                opts.SEID {mni.printing.cards.mustBeValidID(opts.SEID,0)} = [];
             end
             
             obj.Name = 'GRID';
@@ -35,17 +35,23 @@ classdef GRID < mni.printing.cards.BaseCard
             obj.SEID = opts.SEID;            
         end
         
-        function writeToFile(obj,fid)
+        function writeToFile(obj,fid,bComment)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.ID},{obj.CP},{obj.X1},{obj.X2},...
                 {obj.X3},{obj.CD},{obj.PS},{obj.SEID}];
             format = 'iifffisi';
             obj.fprint_nas(fid,format,data);
         end
     end
-end
-function validateEmptyInt(x,GT)
-assert(isempty(x) || x>=GT)
 end
 

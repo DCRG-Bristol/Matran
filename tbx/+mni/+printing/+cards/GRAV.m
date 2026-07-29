@@ -11,7 +11,7 @@ classdef GRAV < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = GRAV(SID,A,Ni,varargin)
+        function obj = GRAV(SID,A,Ni,opts)
             %CAERO1 Construct an instance of this class
             %   required inputs are as follows:
             % SID - Set Identification Number
@@ -24,25 +24,34 @@ classdef GRAV < mni.printing.cards.BaseCard
             % MB - see quick reference guide
             %
             % see NASTRAN users guide for more info
-            p = inputParser();
-            p.addRequired('SID',@(x)x>0)
-            p.addRequired('A',@(x)isnumeric(x)&& numel(x)==1)
-            p.addRequired('Ni',@(x)numel(x)==3)
-            p.addParameter('MB',[])
-            p.addParameter('CID',[],@(x)x>=0)
-            
-            p.parse(SID,A,Ni,varargin{:})
-            
-            names = fieldnames(p.Results);
-            for i = 1:length(names)
-                obj.(names{i}) = p.Results.(names{i});
-            end   
+            arguments
+                SID {mustBeGreaterThan(SID,0)}
+                A (1,1) double
+                Ni (3,1) double
+                opts.MB = []
+                opts.CID double {mni.printing.cards.mustBeValidID(opts.CID,0)} = []
+            end
+
+            obj.SID = SID;
+            obj.A = A;
+            obj.Ni = Ni;
+            obj.MB = opts.MB;
+            obj.CID = opts.CID;
             obj.Name = 'GRAV';
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.SID},{obj.CID},{obj.A},...
                 {obj.Ni(1)},{obj.Ni(2)},{obj.Ni(3)},{obj.MB}];
             format = 'iirrrri';

@@ -15,7 +15,7 @@ classdef CONM1 < mni.printing.cards.BaseCard
                 EID double {mustBeGreaterThan(EID,0)}
                 G double {mustBeGreaterThan(G,0)}
                 M (6,6) double
-                opts.CID double {validateEmptyInt(opts.CID,0)} = [];
+                opts.CID double {mni.printing.cards.mustBeValidID(opts.CID,0)} = [];
             end
             %CONM2 Construct an instance of this class
             %   required inputs are as follows:
@@ -34,7 +34,18 @@ classdef CONM1 < mni.printing.cards.BaseCard
             obj.Name = 'CONM1';
         end
         
-        function writeToFile(obj,fid,varargin)
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             %writeToFile print DMI entry to file
             writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
             I = obj.M;
@@ -47,8 +58,5 @@ classdef CONM1 < mni.printing.cards.BaseCard
             obj.fprint_nas(fid,format,data);
         end
     end
-end
-function validateEmptyInt(x,GT)
-assert(isempty(x) ||(mod(x,1)==0 && x>=GT))
 end
 

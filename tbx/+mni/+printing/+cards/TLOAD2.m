@@ -19,40 +19,57 @@ classdef TLOAD2 < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = TLOAD2(SID,EXCITEID,varargin)
+        function obj = TLOAD2(SID,EXCITEID,opts)
             %FLUTTER_CARD Construct an instance of this class
             %   Detailed explanation goes here
-            p = inputParser();
-            p.addRequired('SID',@(x)x>0);
-            p.addRequired('EXCITEID',@(x)x>0);
-            
-            p.addParameter('DELAYI',[],@(x)x>0);
-            p.addParameter('DELAYR',[]);
-            p.addParameter('TYPE',[]);
+            arguments
+                SID {mustBeGreaterThan(SID,0)}
+                EXCITEID {mustBeGreaterThan(EXCITEID,0)}
+                opts.DELAYI double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.DELAYI,0)} = []
+                opts.DELAYR = []
+                opts.TYPE = []
+                opts.T1 double {mni.printing.cards.mustBeEmptyOrGreaterThanOrEqual(opts.T1,0)} = []
+                opts.T2 double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.T2,0)} = []
+                opts.F double {mni.printing.cards.mustBeEmptyOrGreaterThanOrEqual(opts.F,0)} = []
+                opts.P = []
+                opts.C = []
+                opts.B = []
+                opts.US0 = []
+                opts.VS0 = []
+            end
 
-            p.addParameter('T1',[],@(x)x>=0);
-            p.addParameter('T2',[],@(x)x>0);
-            p.addParameter('F',[],@(x)x>=0);
-            p.addParameter('P',[]);
-            p.addParameter('C',[]);
-            p.addParameter('B',[]);
-            p.addParameter('US0',[]);
-            p.addParameter('VS0',[]);
-            p.parse(SID,EXCITEID,varargin{:});
-
-            if ~isempty(p.Results.DELAYI) && ~isempty(p.Results.DELAYR)
+            if ~isempty(opts.DELAYI) && ~isempty(opts.DELAYR)
                 error('Only one of DELAYI or DELAYR can be defined')
             end
-            names = fieldnames(p.Results);
-            for i = 1:length(names)
-                obj.(names{i}) = p.Results.(names{i});
-            end   
+
+            obj.SID = SID;
+            obj.EXCITEID = EXCITEID;
+            obj.DELAYI = opts.DELAYI;
+            obj.DELAYR = opts.DELAYR;
+            obj.TYPE = opts.TYPE;
+            obj.T1 = opts.T1;
+            obj.T2 = opts.T2;
+            obj.F = opts.F;
+            obj.P = opts.P;
+            obj.C = opts.C;
+            obj.B = opts.B;
+            obj.US0 = opts.US0;
+            obj.VS0 = opts.VS0;
             obj.Name = 'TLOAD2';            
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.SID},{obj.EXCITEID}];
             format = 'ii';
             if isempty(obj.DELAYI) && isempty(obj.DELAYR)

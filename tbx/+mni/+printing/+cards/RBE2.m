@@ -11,28 +11,37 @@ classdef RBE2 < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = RBE2(EID,GN,CM,GMi,varargin)
+        function obj = RBE2(EID,GN,CM,GMi,opts)
             %GRID_CARD Construct an instance of this class
             %   Detailed explanation goes here
-            p = inputParser();
-            p.addRequired('EID',@(x)x>0)
-            p.addRequired('GN',@(x)x>0)
-            p.addRequired('CM')
-            p.addRequired('GMi',@(x)~any(x<=0))
-            p.addParameter('Alpha','')
-            p.parse(EID,GN,CM,GMi,varargin{:})
+            arguments
+                EID {mustBeGreaterThan(EID,0)}
+                GN {mustBeGreaterThan(GN,0)}
+                CM
+                GMi {validatePositiveVector(GMi)}
+                opts.Alpha = ''
+            end
             
             obj.Name = 'RBE2';
-            obj.EID = p.Results.EID;
-            obj.GN = p.Results.GN;
-            obj.CM = p.Results.CM;
-            obj.GMi = p.Results.GMi;
-            obj.Alpha = p.Results.Alpha;           
+            obj.EID = EID;
+            obj.GN = GN;
+            obj.CM = CM;
+            obj.GMi = GMi;
+            obj.Alpha = opts.Alpha;
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.EID},{obj.GN},{obj.CM}];
             format = 'iii';
             for i = 1:length(obj.GMi)
@@ -45,5 +54,9 @@ classdef RBE2 < mni.printing.cards.BaseCard
             obj.fprint_nas(fid,format,data);
         end
     end
+end
+
+function validatePositiveVector(x)
+assert(~any(x <= 0))
 end
 

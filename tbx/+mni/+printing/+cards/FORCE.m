@@ -13,30 +13,39 @@ classdef FORCE < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = FORCE(SID,G,F,N,varargin)
+        function obj = FORCE(SID,G,F,N,opts)
             %GRID_CARD Construct an instance of this class
             %   Detailed explanation goes here
-            p = inputParser();
-            p.addRequired('SID')
-            p.addRequired('G')
-            p.addRequired('F')
-            p.addRequired('N',@(x)numel(x)==3)
-            p.addParameter('CID','',@(x)x>=0)
-            p.parse(SID,G,F,N,varargin{:})
+            arguments
+                SID
+                G
+                F
+                N (3,1) double
+                opts.CID double {mni.printing.cards.mustBeValidID(opts.CID,0)} = []
+            end
             
             obj.Name = 'FORCE';
-            obj.SID = p.Results.SID;
-            obj.G = p.Results.G;
-            obj.N1 = p.Results.N(1);
-            obj.N2 = p.Results.N(2);
-            obj.N3 = p.Results.N(3);
-            obj.F = p.Results.F;
-            obj.CID = p.Results.CID;          
+            obj.SID = SID;
+            obj.G = G;
+            obj.N1 = N(1);
+            obj.N2 = N(2);
+            obj.N3 = N(3);
+            obj.F = F;
+            obj.CID = opts.CID;
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.SID},{obj.G},{obj.CID},{obj.F},...
                 {obj.N1},{obj.N2},{obj.N3}];
             format = 'iiiffff';

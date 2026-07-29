@@ -22,54 +22,59 @@ classdef SPLINE6 < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = SPLINE6(EID,CAERO,AELIST,SETG,varargin)
+        function obj = SPLINE6(EID,CAERO,AELIST,SETG,opts)
             %GRID_CARD Construct an instance of this class
             %   Detailed explanation goes here
-            p = inputParser();
-            p.addRequired('EID',@(x)x>0)
-            p.addRequired('CAERO',@(x)x>0)
-            p.addRequired('AELIST',@(x)x>0)
-            p.addRequired('SETG',@(x)x>0)
-            p.addParameter('DZ',[],@(x)x>=0)
-            p.addParameter('DZR',[],@(x)x>=0)
-            p.addParameter('AUGWEI',[],@(x)x>=0)
-            p.addParameter('I2VNUM',[],@(x)x>0)
-            p.addParameter('D2VNUM',[],@(x)x>0)
-            p.addParameter('METHCON',[],@(x)any(validatestring(x,...
-                {'NODEPROX','CIRCBIAS'})))
-            p.addParameter('METHVS',[],@(x)any(validatestring(x,...
-                {'VS3','VS6'})))
-            p.addParameter('NGRID',[],@(x)x>0)
-            p.addParameter('METH','',@(x)any(validatestring(x,...
-                {'FPS6','FPS3'})))
-            p.addParameter('USAGE',[],@(x)any(validatestring(x,...
-                {'FORCE','DISP','BOTH'})))
-            p.addParameter('ELTOL',[],@(x)x>0)
-            p.addParameter('NCYCLE',[],@(x)x>0)
-            p.parse(EID,CAERO,AELIST,SETG,varargin{:})
+            arguments
+                EID {mustBeGreaterThan(EID,0)}
+                CAERO {mustBeGreaterThan(CAERO,0)}
+                AELIST {mustBeGreaterThan(AELIST,0)}
+                SETG {mustBeGreaterThan(SETG,0)}
+                opts.DZ double {mni.printing.cards.mustBeEmptyOrGreaterThanOrEqual(opts.DZ,0)} = []
+                opts.DZR double {mni.printing.cards.mustBeEmptyOrGreaterThanOrEqual(opts.DZR,0)} = []
+                opts.AUGWEI double {mni.printing.cards.mustBeEmptyOrGreaterThanOrEqual(opts.AUGWEI,0)} = []
+                opts.I2VNUM double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.I2VNUM,0)} = []
+                opts.D2VNUM double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.D2VNUM,0)} = []
+                opts.METHCON {mni.printing.cards.mustBeEmptyOrMember(opts.METHCON,{'NODEPROX','CIRCBIAS'})} = []
+                opts.METHVS {mni.printing.cards.mustBeEmptyOrMember(opts.METHVS,{'VS3','VS6'})} = []
+                opts.NGRID double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.NGRID,0)} = []
+                opts.METH {mni.printing.cards.mustBeEmptyOrMember(opts.METH,{'FPS6','FPS3'})} = ''
+                opts.USAGE {mni.printing.cards.mustBeEmptyOrMember(opts.USAGE,{'FORCE','DISP','BOTH'})} = []
+                opts.ELTOL double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.ELTOL,0)} = []
+                opts.NCYCLE double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.NCYCLE,0)} = []
+            end
             
             obj.Name = 'SPLINE6';
-            obj.EID = p.Results.EID;
-            obj.CAERO = p.Results.CAERO;
-            obj.AELIST = p.Results.AELIST;
-            obj.SETG = p.Results.SETG;
-            obj.DZ = p.Results.DZ;
-            obj.METH = p.Results.METH;
-            obj.USAGE = p.Results.USAGE;
-            obj.I2VNUM = p.Results.I2VNUM;
-            obj.D2VNUM = p.Results.D2VNUM; 
-            obj.DZR = p.Results.DZR;
-            obj.METHCON = p.Results.METHCON;
-            obj.NGRID = p.Results.NGRID;
-            obj.AUGWEI = p.Results.AUGWEI;
-            obj.METHVS = p.Results.METHVS;
-            obj.ELTOL = p.Results.ELTOL;
-            obj.NCYCLE = p.Results.NCYCLE;
+            obj.EID = EID;
+            obj.CAERO = CAERO;
+            obj.AELIST = AELIST;
+            obj.SETG = SETG;
+            obj.DZ = opts.DZ;
+            obj.METH = opts.METH;
+            obj.USAGE = opts.USAGE;
+            obj.I2VNUM = opts.I2VNUM;
+            obj.D2VNUM = opts.D2VNUM;
+            obj.DZR = opts.DZR;
+            obj.METHCON = opts.METHCON;
+            obj.NGRID = opts.NGRID;
+            obj.AUGWEI = opts.AUGWEI;
+            obj.METHVS = opts.METHVS;
+            obj.ELTOL = opts.ELTOL;
+            obj.NCYCLE = opts.NCYCLE;
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.EID},{obj.CAERO},{obj.AELIST},...
                 {obj.SETG},{obj.DZ},{obj.METH},{obj.USAGE},{obj.I2VNUM},{obj.D2VNUM},...
                 {obj.METHVS},{obj.DZR},{obj.METHCON},{obj.NGRID},{obj.ELTOL},{obj.NCYCLE},{obj.AUGWEI}];

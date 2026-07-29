@@ -14,37 +14,34 @@ classdef DMI < mni.printing.cards.BaseCard
         function obj = DMI(NAME,MATRIX,FORM,TIN,TOUT)
             %FLUTTER_CARD Construct an instance of this class
             %   Detailed explanation goes here
-            function pass = check_form(x)
-                pass = any([1,2,3]==x);
-                if ~pass
-                   error('only matrix forms 1,2,3 are currently supported') 
-                end
+            arguments
+                NAME char
+                MATRIX {mustBeNumeric}
+                FORM {mustBeSupportedForm}
+                TIN {mustBeSupportedT(TIN,[1,2])}
+                TOUT {mustBeSupportedT(TOUT,[0,1,2])}
             end
-            function pass = check_T(x,vals)
-                pass = any(vals==x);
-                if ~pass
-                   error('only real number forms are currently supported') 
-                end
-            end
-            p = inputParser();
-            p.addRequired('NAME',@(x)ischar(x))
-            p.addRequired('MATRIX',@(x)isnumeric(x))
-            p.addRequired('FORM',@check_form)
-            p.addRequired('TIN',@(x)check_T(x,[1,2]))
-            p.addRequired('TOUT',@(x)check_T(x,[0,1,2]))
-            p.parse(NAME,MATRIX,FORM,TIN,TOUT)
             
             obj.Name = 'DMI';
-            obj.NAME = p.Results.NAME;
-            obj.MATRIX = p.Results.MATRIX;
-            obj.FORM = p.Results.FORM;
-            obj.TIN = p.Results.TIN;
-            obj.TOUT = p.Results.TOUT;            
+            obj.NAME = NAME;
+            obj.MATRIX = MATRIX;
+            obj.FORM = FORM;
+            obj.TIN = TIN;
+            obj.TOUT = TOUT;
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             % write the header card to the file
             data = [{obj.NAME},{0},{obj.FORM},{obj.TIN},{obj.TOUT},...
                 {size(obj.MATRIX,1)},{size(obj.MATRIX,2)}];
@@ -101,5 +98,17 @@ classdef DMI < mni.printing.cards.BaseCard
             end
         end
     end
+end
+
+function mustBeSupportedForm(x)
+if ~any([1,2,3] == x)
+    error('only matrix forms 1,2,3 are currently supported')
+end
+end
+
+function mustBeSupportedT(x,vals)
+if ~any(vals == x)
+    error('only real number forms are currently supported')
+end
 end
 

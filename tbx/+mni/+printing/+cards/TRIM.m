@@ -13,7 +13,7 @@ classdef TRIM < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = TRIM(SID,MACH,Q,label_values,varargin)
+        function obj = TRIM(SID,MACH,Q,label_values,opts)
             %CAERO1 Construct an instance of this class
             %   required inputs are as follows:
             % SID - set identification number
@@ -26,18 +26,28 @@ classdef TRIM < mni.printing.cards.BaseCard
             % AEQR - Flag to request a rigid trim analysis (default 1.0)
             %
             % see NASTRAN users guide for more info
-            p = inputParser();
-            p.addRequired('SID',@(x)x>0)
-            p.addRequired('MACH',@(x)x>=0 && x~=1)
-            p.addRequired('Q',@(x)x>0)
-            p.addRequired('label_values',@check_labels)
-            p.addParameter('AEQR',[],@(x)x>=0 && x<=1)
-            p.parse(SID,MACH,Q,label_values,varargin{:})
-            
-            names = fieldnames(p.Results);
-            for i = 1:length(names)
-                obj.(names{i}) = p.Results.(names{i});
-            end 
+            arguments
+                SID {mustBeGreaterThan(SID,0)}
+                MACH {mustBeGreaterThanOrEqual(MACH,0)}
+                Q {mustBeGreaterThan(Q,0)}
+                label_values {check_labels}
+                opts.AEQR = []
+            end
+
+            if MACH == 1
+                error('MACH must not equal 1.')
+            end
+            if ~isempty(opts.AEQR)
+                if ~(opts.AEQR>=0 && opts.AEQR<=1)
+                    error('AEQR must be in the range [0,1].')
+                end
+            end
+
+            obj.SID = SID;
+            obj.MACH = MACH;
+            obj.Q = Q;
+            obj.label_values = label_values;
+            obj.AEQR = opts.AEQR;
             obj.Name = 'TRIM';
             
             % clear blank labels
@@ -52,9 +62,18 @@ classdef TRIM < mni.printing.cards.BaseCard
             obj.label_values = labels;
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.SID},{obj.MACH},{obj.Q}];
             format = 'irr';
             if length(obj.label_values)==2

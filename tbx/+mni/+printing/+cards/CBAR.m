@@ -17,7 +17,7 @@ classdef CBAR < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = CBAR(EID,PID,GA,GB,varargin)
+        function obj = CBAR(EID,PID,GA,GB,opts)
             %CAERO1 Construct an instance of this class
             %   required inputs are as follows:
             % EID - element identification
@@ -35,31 +35,50 @@ classdef CBAR < mni.printing.cards.BaseCard
             % PB - see quick reference guide
             %
             % see NASTRAN users guide for more info
-            p = inputParser();
-            p.addRequired('EID')
-            p.addRequired('PID')
-            p.addRequired('GA')
-            p.addRequired('GB')
-            p.addParameter('G0',[],@(x)x>0)
-            p.addParameter('X',@(x)numel(x)==3)
-            p.addParameter('Wa',@(x)numel(x)==3)
-            p.addParameter('Wb',@(x)numel(x)==3)
-            p.addParameter('OFFST','',@ischar)
-            p.addParameter('PA',[],@(x)x>0)
-            p.addParameter('PB',[],@(x)x>0)
-            
-            p.parse(EID,PID,GA,GB,varargin{:})
-            
-            names = fieldnames(p.Results);
-            for i = 1:length(names)
-                obj.(names{i}) = p.Results.(names{i});
-            end   
+            arguments
+                EID
+                PID
+                GA
+                GB
+                opts.G0 double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.G0,0)} = []
+                opts.X double {mni.printing.cards.mustBeEmptyOr3x1Vec(opts.X)} = []
+                opts.Wa double {mni.printing.cards.mustBeEmptyOr3x1Vec(opts.Wa)} = []
+                opts.Wb double {mni.printing.cards.mustBeEmptyOr3x1Vec(opts.Wb)} = []
+                opts.OFFST = ''
+                opts.PA double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.PA,0)} = []
+                opts.PB double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.PB,0)} = []
+            end
+
+            if ~isempty(opts.OFFST)
+                mustBeTextScalar(opts.OFFST)
+            end
+
+            obj.EID = EID;
+            obj.PID = PID;
+            obj.GA = GA;
+            obj.GB = GB;
+            obj.G0 = opts.G0;
+            obj.X = opts.X;
+            obj.Wa = opts.Wa;
+            obj.Wb = opts.Wb;
+            obj.OFFST = opts.OFFST;
+            obj.PA = opts.PA;
+            obj.PB = opts.PB;
             obj.Name = 'CBAR';
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             if isempty(obj.G0)
                 data = [{obj.EID},{obj.PID},{obj.GA},{obj.GB},...
                 {obj.X(1)},{obj.X(2)},{obj.X(3)},{obj.OFFST},...

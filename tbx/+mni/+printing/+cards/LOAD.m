@@ -24,8 +24,18 @@ classdef LOAD < mni.printing.cards.BaseCard
             obj.Name = 'LOAD';            
         end
         
-        function writeToFile(obj,fid,varargin)
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.SID},{obj.ScaleFactor}];
             format = 'ir';
             for i = 1:length(obj.SIDs)

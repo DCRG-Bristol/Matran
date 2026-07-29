@@ -10,10 +10,9 @@ classdef COLUMNDELIM < mni.printing.cards.BaseCard
         function obj = COLUMNDELIM(fieldType)
             %GRID_CARD Construct an instance of this class
             %   Detailed explanation goes here
-            if nargin == 0 %Default to large-field format
-                fieldType = 'large';
+            arguments
+                fieldType {mustBeMember(fieldType,{'long','short','large','normal','8','16'})} = 'large'
             end
-            validatestring(fieldType, {'long','short','large', 'normal', '8', '16'});
             obj.fieldType = fieldType;         
         end
         

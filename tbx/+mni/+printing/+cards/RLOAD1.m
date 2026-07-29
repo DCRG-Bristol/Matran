@@ -17,45 +17,62 @@ classdef RLOAD1 < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = RLOAD1(SID,EXCITEID,varargin)
+        function obj = RLOAD1(SID,EXCITEID,opts)
             %FLUTTER_CARD Construct an instance of this class
             %   Detailed explanation goes here
-            p = inputParser();
-            p.addRequired('SID',@(x)x>0);
-            p.addRequired('EXCITEID',@(x)x>0);
-            p.addParameter('DELAYI',[],@(x)x>0);
-            p.addParameter('DELAYR',[]);
-            p.addParameter('DPHASEI',[],@(x)x>0);
-            p.addParameter('DPHASER',[]);
-            p.addParameter('TC',[],@(x)x>0);
-            p.addParameter('RC',[]);
-            p.addParameter('TD',[],@(x)x>0);
-            p.addParameter('RD',[]);
-            p.addParameter('TYPE',[]);
-            p.parse(SID,EXCITEID,varargin{:});
+            arguments
+                SID {mustBeGreaterThan(SID,0)}
+                EXCITEID {mustBeGreaterThan(EXCITEID,0)}
+                opts.DELAYI double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.DELAYI,0)} = []
+                opts.DELAYR = []
+                opts.DPHASEI double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.DPHASEI,0)} = []
+                opts.DPHASER = []
+                opts.TC double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.TC,0)} = []
+                opts.RC = []
+                opts.TD double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.TD,0)} = []
+                opts.RD = []
+                opts.TYPE = []
+            end
 
-            if ~isempty(p.Results.DELAYI) && ~isempty(p.Results.DELAYR)
+            if ~isempty(opts.DELAYI) && ~isempty(opts.DELAYR)
                 error('Only one of DELAYI or DELAYR can be defined')
             end
-            if ~isempty(p.Results.DPHASEI) && ~isempty(p.Results.DPHASER)
+            if ~isempty(opts.DPHASEI) && ~isempty(opts.DPHASER)
                 error('Only one of DPHASEI or DPHASER can be defined')
             end
-            if ~isempty(p.Results.TC) && ~isempty(p.Results.RC)
+            if ~isempty(opts.TC) && ~isempty(opts.RC)
                 error('Only one of TC or RC can be defined')
             end
-            if ~isempty(p.Results.TD) && ~isempty(p.Results.RD)
+            if ~isempty(opts.TD) && ~isempty(opts.RD)
                 error('Only one of TD or RD can be defined')
             end
-            names = fieldnames(p.Results);
-            for i = 1:length(names)
-                obj.(names{i}) = p.Results.(names{i});
-            end   
+
+            obj.SID = SID;
+            obj.EXCITEID = EXCITEID;
+            obj.DELAYI = opts.DELAYI;
+            obj.DELAYR = opts.DELAYR;
+            obj.DPHASEI = opts.DPHASEI;
+            obj.DPHASER = opts.DPHASER;
+            obj.TC = opts.TC;
+            obj.RC = opts.RC;
+            obj.TD = opts.TD;
+            obj.RD = opts.RD;
+            obj.TYPE = opts.TYPE;
             obj.Name = 'RLOAD1';            
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.SID},{obj.EXCITEID}];
             format = 'ii';
             [format,data] = blank_ID_real(format,data,obj.DELAYI,obj.DELAYR);

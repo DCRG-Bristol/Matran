@@ -12,28 +12,39 @@ classdef PBUSH < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = PBUSH(PID,varargin)
+        function obj = PBUSH(PID,opts)
             %GRID_CARD Construct an instance of this class
             %   Detailed explanation goes here
-            p = inputParser();
-            p.addRequired('PID',@(x)x>0)
-            p.addParameter('K',[],@(x)length(x)==6)
-            p.addParameter('B',[],@(x)length(x)==6)
-            p.addParameter('GE',[],@(x)length(x)==6)
-            p.addParameter('RCV',[],@(x)length(x)==4)
-            p.addParameter('M',[],@(x)length(x)==1)
-            p.parse(PID,varargin{:})
+            arguments
+                PID {mustBeGreaterThan(PID,0)}
+                opts.K {mni.printing.cards.mustBeEmptyOrLength(opts.K,6)} = []
+                opts.B {mni.printing.cards.mustBeEmptyOrLength(opts.B,6)} = []
+                opts.GE {mni.printing.cards.mustBeEmptyOrLength(opts.GE,6)} = []
+                opts.RCV {mni.printing.cards.mustBeEmptyOrLength(opts.RCV,4)} = []
+                opts.M {mni.printing.cards.mustBeEmptyOrLength(opts.M,1)} = []
+            end
             
             obj.Name = 'PBUSH';
-            names = fieldnames(p.Results);
-            for i = 1:length(names)
-                obj.(names{i}) = p.Results.(names{i});
-            end               
+            obj.PID = PID;
+            obj.K = opts.K;
+            obj.B = opts.B;
+            obj.GE = opts.GE;
+            obj.RCV = opts.RCV;
+            obj.M = opts.M;
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.PID}];
             format = 'i';
             if ~isempty(obj.K)

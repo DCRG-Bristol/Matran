@@ -18,44 +18,51 @@ classdef SPLINE7 < mni.printing.cards.BaseCard
     end
     
     methods
-        function obj = SPLINE7(EID,CAERO,AELIST,SETG,CID,varargin)
+        function obj = SPLINE7(EID,CAERO,AELIST,SETG,CID,opts)
             %GRID_CARD Construct an instance of this class
             %   Detailed explanation goes here
-            p = inputParser();
-            p.addRequired('EID',@(x)x>0)
-            p.addRequired('CAERO',@(x)x>0)
-            p.addRequired('AELIST',@(x)x>0)
-            p.addRequired('SETG',@(x)x>0)
-            p.addRequired('CID',@(x)x>=0)
-            p.addParameter('DZ',[],@(x)x>=0)
-            p.addParameter('DTOR',[],@(x)x>=0)
-            p.addParameter('METHOD','',@(x)any(validatestring(x,...
-                {'FBS6','FBS3'})))
-            p.addParameter('DZR',[],@(x)x>=0)
-            p.addParameter('IA2',[],@(x)x>0)
-            p.addParameter('USAGE',[],@(x)any(validatestring(x,...
-                {'FORCE','DISP','BOTH'})))
-            p.addParameter('EPSBM',[],@(x)x>0)
-            p.parse(EID,CAERO,AELIST,SETG,CID,varargin{:})
+            arguments
+                EID {mustBeGreaterThan(EID,0)}
+                CAERO {mustBeGreaterThan(CAERO,0)}
+                AELIST {mustBeGreaterThan(AELIST,0)}
+                SETG {mustBeGreaterThan(SETG,0)}
+                CID {mustBeGreaterThanOrEqual(CID,0)}
+                opts.DZ double {mni.printing.cards.mustBeEmptyOrGreaterThanOrEqual(opts.DZ,0)} = []
+                opts.DTOR double {mni.printing.cards.mustBeEmptyOrGreaterThanOrEqual(opts.DTOR,0)} = []
+                opts.METHOD {mni.printing.cards.mustBeEmptyOrMember(opts.METHOD,{'FBS6','FBS3'})} = ''
+                opts.DZR double {mni.printing.cards.mustBeEmptyOrGreaterThanOrEqual(opts.DZR,0)} = []
+                opts.IA2 double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.IA2,0)} = []
+                opts.USAGE {mni.printing.cards.mustBeEmptyOrMember(opts.USAGE,{'FORCE','DISP','BOTH'})} = []
+                opts.EPSBM double {mni.printing.cards.mustBeEmptyOrGreaterThan(opts.EPSBM,0)} = []
+            end
             
             obj.Name = 'SPLINE7';
-            obj.EID = p.Results.EID;
-            obj.CAERO = p.Results.CAERO;
-            obj.AELIST = p.Results.AELIST;
-            obj.SETG = p.Results.SETG;
-            obj.CID = p.Results.CID;
-            obj.DZ = p.Results.DZ;
-            obj.DTOR = p.Results.DTOR;
-            obj.METHOD = p.Results.METHOD;
-            obj.DZR = p.Results.DZR;
-            obj.IA2 = p.Results.IA2;
-            obj.USAGE = p.Results.USAGE;
-            obj.EPSBM = p.Results.EPSBM;
+            obj.EID = EID;
+            obj.CAERO = CAERO;
+            obj.AELIST = AELIST;
+            obj.SETG = SETG;
+            obj.CID = CID;
+            obj.DZ = opts.DZ;
+            obj.DTOR = opts.DTOR;
+            obj.METHOD = opts.METHOD;
+            obj.DZR = opts.DZR;
+            obj.IA2 = opts.IA2;
+            obj.USAGE = opts.USAGE;
+            obj.EPSBM = opts.EPSBM;
         end
         
-        function writeToFile(obj,fid,varargin)
-            %writeToFile print DMI entry to file
-            writeToFile@mni.printing.cards.BaseCard(obj,fid,varargin{:})
+        function writeToFile(obj,fid,bComment)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            arguments
+                obj
+                fid
+                bComment logical = false
+            end
+            
+            if bComment %Comments by standard
+                mni.printing.bdf.writeComment([obj.Name 'card'],fid)
+            end
             data = [{obj.EID},{obj.CAERO},{obj.AELIST},...
                 {obj.SETG},{obj.DZ},{obj.DTOR},{obj.CID},{obj.USAGE},...
                 {obj.METHOD},{obj.DZR},{obj.IA2},{obj.EPSBM}];
