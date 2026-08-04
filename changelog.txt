@@ -11,6 +11,10 @@ and this project adheres to [Explicit Versioning](https://github.com/exadra37-ve
 - Added DELAY card, selectively print DMIG header
 - CONM1 Mass
 - Added turbulence PSDF readers
+- Added NLPARM card (nonlinear iteration strategy, for SOL 106/129/400). Note the third
+        continuation line (MAXBIS / MAXR / RTOLB) is only written when one of those fields
+        is supplied; its field positions follow the QRG layout and are untested.
+- Added hdf5 "read_applied_load" method to read the applied load vector (OLOAD = ALL)
 ### Changed
 - Removed the unnessacary extra subfolder "matran" between "tbx" and "+mni" 
 - Output of f06 "read_flutter" method now the same as from hdf5 "read_flutter_summary" method
